@@ -29,12 +29,23 @@ internal class ArticleControllerTest {
 	@Test
 	internal fun shouldCreateArticle(@Random article: Article, @Random createdArticleId: ObjectId) {
 		service.stub {
-			on { createArticle(article) } doReturn article.copy(id = createdArticleId)
+			on { createArticle(article) } doReturn article.copy(createdArticleId)
 		}
 
 		val response = controller.createArticle(article)
 
 		assertThat(response.statusCode, `is`(HttpStatus.CREATED))
 		assertThat(response.headers.location, `is`(URI.create("/articles/${createdArticleId}")))
+	}
+
+	@Test
+	internal fun shouldGetArticle(@Random article: Article, @Random id: ObjectId) {
+		val savedArticle = article.copy(id)
+		service.stub { on { getArticleById(id) } doReturn savedArticle }
+
+		val response = controller.getArticleById(id)
+
+		assertThat(response.statusCode, `is`(HttpStatus.OK))
+		assertThat(response.body, `is`(savedArticle))
 	}
 }
