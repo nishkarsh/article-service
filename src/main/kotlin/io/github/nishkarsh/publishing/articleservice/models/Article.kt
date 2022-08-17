@@ -1,3 +1,5 @@
 package io.github.nishkarsh.publishing.articleservice.models
 
-data class Article(val id: String)
+import org.springframework.data.annotation.Id
+
+data class Article(@Id val id: String)
