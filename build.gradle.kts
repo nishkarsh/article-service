@@ -17,11 +17,12 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.data:spring-data-mongodb:3.4.2")
+	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.8")
 	testImplementation("org.mockito:mockito-junit-jupiter:4.6.1")
 	testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 	testImplementation("io.github.glytching:junit-extensions:2.6.0")

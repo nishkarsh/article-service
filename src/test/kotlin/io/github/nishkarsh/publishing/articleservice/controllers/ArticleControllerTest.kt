@@ -4,6 +4,7 @@ import io.github.glytching.junit.extension.random.Random
 import io.github.glytching.junit.extension.random.RandomBeansExtension
 import io.github.nishkarsh.publishing.articleservice.models.Article
 import io.github.nishkarsh.publishing.articleservice.services.ArticleService
+import org.bson.types.ObjectId
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is.`is`
 import org.junit.jupiter.api.Test
@@ -26,7 +27,7 @@ internal class ArticleControllerTest {
 	private lateinit var controller: ArticleController
 
 	@Test
-	internal fun shouldCreateArticle(@Random article: Article, @Random createdArticleId: String) {
+	internal fun shouldCreateArticle(@Random article: Article, @Random createdArticleId: ObjectId) {
 		service.stub {
 			on { createArticle(article) } doReturn article.copy(id = createdArticleId)
 		}
