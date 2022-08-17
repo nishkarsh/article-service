@@ -42,6 +42,6 @@ internal class ArticleRepositoryTest {
 		// since the converters would kick-in only during read
 		assertThat(foundArticles[0])
 			.usingRecursiveComparison()
-			.ignoringFields(publishDate).isEqualTo(insertedArticle);
+			.ignoringFields(publishDate).isEqualTo(insertedArticle)
 	}
 }
