@@ -1,0 +1,21 @@
+services:
+  mongodb:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: service-read-write
+      MONGO_INITDB_ROOT_PASSWORD: rq#53$M9Hk
+      MONGO_INITDB_DATABASE: articlesdb
+
+  article-service:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: mongodb
+      DB_USER: service-read-write
+      DB_PASS: rq#53$M9Hk
+    volumes:
+      - .:/development
+    depends_on:
+      - mongodb
