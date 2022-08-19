@@ -2,12 +2,14 @@ package io.github.nishkarsh.publishing.articleservice.controllers
 
 import io.github.glytching.junit.extension.random.Random
 import io.github.glytching.junit.extension.random.RandomBeansExtension
+import io.github.nishkarsh.publishing.articleservice.exceptions.ArticleNotFoundException
 import io.github.nishkarsh.publishing.articleservice.models.Article
 import io.github.nishkarsh.publishing.articleservice.services.ArticleService
 import org.bson.types.ObjectId
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is.`is`
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.Extensions
 import org.mockito.InjectMocks
@@ -47,5 +49,14 @@ internal class ArticleControllerTest {
 
 		assertThat(response.statusCode, `is`(HttpStatus.OK))
 		assertThat(response.body, `is`(savedArticle))
+	}
+
+	@Test
+	internal fun shouldThrowExceptionWhenArticleNotFound(@Random id: ObjectId) {
+		val thrown = assertThrows<ArticleNotFoundException> {
+			controller.getArticleById(id)
+		}
+
+		assertThat(thrown.message, `is`("Could not find article with ID: $id"))
 	}
 }

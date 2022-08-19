@@ -1,5 +1,6 @@
 package io.github.nishkarsh.publishing.articleservice.controllers
 
+import io.github.nishkarsh.publishing.articleservice.exceptions.ArticleNotFoundException
 import io.github.nishkarsh.publishing.articleservice.models.Article
 import io.github.nishkarsh.publishing.articleservice.services.ArticleService
 import org.bson.types.ObjectId
@@ -19,6 +20,7 @@ class ArticleController(private val service: ArticleService) {
 
 	@GetMapping("/{id}")
 	fun getArticleById(@PathVariable id: ObjectId): ResponseEntity<Article> {
-		return ResponseEntity.ok(service.getArticleById(id))
+		return service.getArticleById(id)?.let { ResponseEntity.ok(it) }
+			?: throw ArticleNotFoundException("Could not find article with ID: $id")
 	}
 }

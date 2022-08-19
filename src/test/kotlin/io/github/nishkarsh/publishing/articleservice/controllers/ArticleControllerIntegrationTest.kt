@@ -3,54 +3,76 @@ package io.github.nishkarsh.publishing.articleservice.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.glytching.junit.extension.random.Random
 import io.github.glytching.junit.extension.random.RandomBeansExtension
+import io.github.nishkarsh.publishing.articleservice.helpers.TestHelper.toUtcAndTruncatedToSeconds
 import io.github.nishkarsh.publishing.articleservice.models.Article
-import io.github.nishkarsh.publishing.articleservice.services.ArticleService
 import org.bson.types.ObjectId
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.`is`
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.stub
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.http.HttpHeaders.LOCATION
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.time.ZoneId
 
 
-@WebMvcTest(controllers = [ArticleController::class])
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 @ExtendWith(RandomBeansExtension::class)
 class ArticleControllerIntegrationTest {
 	@Autowired
 	private lateinit var mockMvc: MockMvc
 
-	@MockBean
-	private lateinit var articleService: ArticleService
-
 	@Autowired
 	private lateinit var objectMapper: ObjectMapper
 
+	@Autowired
+	private lateinit var mongoTemplate: MongoTemplate
+
+	@BeforeEach
+	fun setUp() {
+		mongoTemplate.dropCollection(Article::class.java)
+	}
+
 	@Test
-	internal fun shouldReturnCreatedStatusWhenArticleCreated(
-		@Random(excludes = ["id"]) article: Article, @Random createdId: ObjectId
-	) {
-		val articleLocation = "/articles/${createdId}"
-		val publishDateInUTC = article.publishDate.withZoneSameInstant(ZoneId.of("UTC"))
-		val deserializedArticle = article.copy(publishDate = publishDateInUTC)
-		val insertedArticle = deserializedArticle.copy(id = createdId)
-
-		articleService.stub { on { createArticle(deserializedArticle) } doReturn insertedArticle }
-
+	internal fun shouldCreateArticle(@Random(excludes = ["id"]) article: Article) {
 		val request = post("/articles/")
 			.content(objectMapper.writeValueAsBytes(article))
-			.contentType(MediaType.APPLICATION_JSON)
-		mockMvc.perform(request)
-			.andExpect(status().isCreated)
-			.andExpect(header().string(HttpHeaders.LOCATION, `is`(articleLocation)))
+			.contentType(APPLICATION_JSON)
+
+		val result = mockMvc.perform(request)
+			.andExpect(status().isCreated).andReturn()
+
+		val foundArticles = mongoTemplate.findAll(Article::class.java)
+		assertThat(foundArticles, hasSize(1))
+		assertThat(result.response.getHeaderValue(LOCATION), `is`("/articles/${foundArticles[0].id}"))
+	}
+
+	@Test
+	internal fun shouldFindArticleById(@Random(excludes = ["id"]) article: Article) {
+		val articleToInsert = article.copy(publishDate = toUtcAndTruncatedToSeconds(article.publishDate))
+		val insertedArticle = mongoTemplate.insert<Article>(articleToInsert)
+
+		mockMvc.perform(MockMvcRequestBuilders.get("/articles/{id}", insertedArticle.id))
+			.andExpect(status().isOk)
+			.andExpect(content().json(objectMapper.writeValueAsString(insertedArticle)))
+	}
+
+	@Test
+	internal fun shouldReturn404WhenArticleNotFound(@Random articleId: ObjectId) {
+		mockMvc.perform(MockMvcRequestBuilders.get("/articles/{id}", articleId))
+			.andExpect(status().isNotFound)
+			.andExpect(content().json("{\"message\":\"Could not find article with ID: ${articleId}\"}"))
 	}
 }

@@ -3,6 +3,7 @@ package io.github.nishkarsh.publishing.articleservice.services
 import io.github.nishkarsh.publishing.articleservice.models.Article
 import io.github.nishkarsh.publishing.articleservice.repositories.ArticleRepository
 import org.bson.types.ObjectId
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
@@ -12,6 +13,6 @@ class ArticleService(private val repository: ArticleRepository) {
 	}
 
 	fun getArticleById(id: ObjectId): Article? {
-		TODO("Not yet implemented")
+		return repository.findByIdOrNull(id)
 	}
 }
