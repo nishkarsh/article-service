@@ -64,6 +64,30 @@ internal class ArticleServiceTest {
 	}
 
 	@Test
+	internal fun shouldThrowExceptionOnUpdateWhenArticleNotFound(@Random article: Article) {
+		repository.stub { on { existsById(article.id!!) } doReturn false }
+
+		val exception = assertThrows<ArticleNotFoundException> {
+			service.updateArticle(article)
+		}
+
+		assertThat(exception.message, `is`("Could not find article with ID: ${article.id}"))
+	}
+
+	@Test
+	internal fun shouldUpdateArticle(@Random article: Article, @Random updatedArticle: Article) {
+		repository.stub {
+			on { existsById(article.id!!) } doReturn true
+			on { save(article) } doReturn updatedArticle
+		}
+
+		val returnedArticle = service.updateArticle(article)
+
+		verify(repository, times(1)).save(article)
+		assertThat(returnedArticle, `is`(updatedArticle))
+	}
+
+	@Test
 	internal fun shouldThrowExceptionOnDeleteWhenArticleNotFound(@Random articleId: ObjectId) {
 		repository.stub { on { existsById(articleId) } doReturn false }
 

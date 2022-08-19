@@ -63,6 +63,14 @@ internal class ArticleControllerTest {
 	}
 
 	@Test
+	internal fun shouldUpdateArticleConsideringIdFromPath(@Random article: Article, @Random articleId: ObjectId) {
+		val response = controller.updateArticle(articleId, article)
+
+		verify(service, times(1)).updateArticle(article.copy(id = articleId))
+		assertThat(response.statusCode, `is`(HttpStatus.NO_CONTENT))
+	}
+
+	@Test
 	internal fun shouldDeleteArticle(@Random id: ObjectId) {
 		val response = controller.deleteById(id)
 

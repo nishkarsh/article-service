@@ -24,6 +24,12 @@ class ArticleController(private val service: ArticleService) {
 			?: throw ArticleNotFoundException("Could not find article with ID: $id")
 	}
 
+	@PutMapping("/{id}")
+	fun updateArticle(@PathVariable id: ObjectId, @RequestBody article: Article): ResponseEntity<Unit> {
+		service.updateArticle(article.copy(id = id))
+		return ResponseEntity.noContent().build()
+	}
+
 	@DeleteMapping("/{id}")
 	fun deleteById(@PathVariable id: ObjectId): ResponseEntity<Unit> {
 		service.deleteArticleById(id)
