@@ -2,8 +2,11 @@ package io.github.nishkarsh.publishing.articleservice.services
 
 import io.github.nishkarsh.publishing.articleservice.exceptions.ArticleNotFoundException
 import io.github.nishkarsh.publishing.articleservice.models.Article
+import io.github.nishkarsh.publishing.articleservice.models.SearchCriteria
 import io.github.nishkarsh.publishing.articleservice.repositories.ArticleRepository
 import org.bson.types.ObjectId
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
@@ -17,7 +20,7 @@ class ArticleService(private val repository: ArticleRepository) {
 		return repository.findByIdOrNull(id)
 	}
 
-	fun getArticles(allParams: Map<String, String>): List<Article> {
+	fun getArticles(searchCriteria: SearchCriteria, pageable: Pageable): Page<Article> {
 		TODO("Not yet implemented")
 	}
 

@@ -4,6 +4,7 @@ import io.github.glytching.junit.extension.random.Random
 import io.github.glytching.junit.extension.random.RandomBeansExtension
 import io.github.nishkarsh.publishing.articleservice.exceptions.ArticleNotFoundException
 import io.github.nishkarsh.publishing.articleservice.models.Article
+import io.github.nishkarsh.publishing.articleservice.models.SearchCriteria
 import io.github.nishkarsh.publishing.articleservice.services.ArticleService
 import org.bson.types.ObjectId
 import org.hamcrest.MatcherAssert.assertThat
@@ -19,6 +20,9 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import java.net.URI
 
@@ -54,25 +58,25 @@ internal class ArticleControllerTest {
 	}
 
 	@Test
-	internal fun shouldGetArticlesByQueryParams(
-		@Random(size = 3) articles: List<Article>, @Random(size = 2) params: Map<String, String>
+	internal fun shouldGetPagedArticlesByQueryParams(
+		@Random(size = 10) articles: List<Article>, @Random searchCriteria: SearchCriteria, @Random pageable: Pageable
 	) {
-		service.stub { on { getArticles(params) } doReturn articles }
+		service.stub { on { getArticles(searchCriteria, pageable) } doReturn PageImpl(articles) }
 
-		val response = controller.searchArticles(params)
+		val response = controller.searchArticles(searchCriteria, pageable)
 
 		assertThat(response.statusCode, `is`(HttpStatus.OK))
-		assertThat(response.body, `is`(articles))
+		assertThat(response.body, `is`(PageImpl(articles)))
 	}
 
 	@Test
-	internal fun shouldReturnEmptyListWhenNoArticlesFoundByQueryParams(@Random(size = 2) params: Map<String, String>) {
-		service.stub { on { getArticles(params) } doReturn emptyList() }
+	internal fun shouldReturnEmptyListWhenNoArticlesFoundByQueryParams(@Random searchCriteria: SearchCriteria) {
+		service.stub { on { getArticles(searchCriteria, Pageable.unpaged()) } doReturn Page.empty() }
 
-		val response = controller.searchArticles(params)
+		val response = controller.searchArticles(searchCriteria, Pageable.unpaged())
 
 		assertThat(response.statusCode, `is`(HttpStatus.OK))
-		assertThat(response.body, `is`(emptyList()))
+		assertThat(response.body, `is`(Page.empty()))
 	}
 
 	@Test
@@ -94,7 +98,7 @@ internal class ArticleControllerTest {
 
 	@Test
 	internal fun shouldDeleteArticle(@Random id: ObjectId) {
-		val response = controller.deleteById(id)
+		val response = controller.deleteArticleById(id)
 
 		verify(service, times(1)).deleteArticleById(id)
 		assertThat(response.statusCode, `is`(HttpStatus.NO_CONTENT))

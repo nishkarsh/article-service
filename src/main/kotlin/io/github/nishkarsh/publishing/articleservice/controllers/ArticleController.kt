@@ -2,8 +2,11 @@ package io.github.nishkarsh.publishing.articleservice.controllers
 
 import io.github.nishkarsh.publishing.articleservice.exceptions.ArticleNotFoundException
 import io.github.nishkarsh.publishing.articleservice.models.Article
+import io.github.nishkarsh.publishing.articleservice.models.SearchCriteria
 import io.github.nishkarsh.publishing.articleservice.services.ArticleService
 import org.bson.types.ObjectId
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -25,8 +28,8 @@ class ArticleController(private val service: ArticleService) {
 	}
 
 	@GetMapping
-	fun searchArticles(@RequestParam allParams: Map<String, String>): ResponseEntity<List<Article>> {
-		return ResponseEntity.ok(service.getArticles(allParams))
+	fun searchArticles(@RequestParam criteria: SearchCriteria, pageable: Pageable): ResponseEntity<Page<Article>> {
+		return ResponseEntity.ok(service.getArticles(criteria, pageable))
 	}
 
 	@PutMapping("/{id}")
@@ -36,7 +39,7 @@ class ArticleController(private val service: ArticleService) {
 	}
 
 	@DeleteMapping("/{id}")
-	fun deleteById(@PathVariable id: ObjectId): ResponseEntity<Unit> {
+	fun deleteArticleById(@PathVariable id: ObjectId): ResponseEntity<Unit> {
 		service.deleteArticleById(id)
 		return ResponseEntity.noContent().build()
 	}
