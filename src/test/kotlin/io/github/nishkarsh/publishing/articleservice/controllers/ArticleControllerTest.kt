@@ -54,6 +54,28 @@ internal class ArticleControllerTest {
 	}
 
 	@Test
+	internal fun shouldGetArticlesByQueryParams(
+		@Random(size = 3) articles: List<Article>, @Random(size = 2) params: Map<String, String>
+	) {
+		service.stub { on { getArticles(params) } doReturn articles }
+
+		val response = controller.searchArticles(params)
+
+		assertThat(response.statusCode, `is`(HttpStatus.OK))
+		assertThat(response.body, `is`(articles))
+	}
+
+	@Test
+	internal fun shouldReturnEmptyListWhenNoArticlesFoundByQueryParams(@Random(size = 2) params: Map<String, String>) {
+		service.stub { on { getArticles(params) } doReturn emptyList() }
+
+		val response = controller.searchArticles(params)
+
+		assertThat(response.statusCode, `is`(HttpStatus.OK))
+		assertThat(response.body, `is`(emptyList()))
+	}
+
+	@Test
 	internal fun shouldThrowExceptionWhenArticleNotFound(@Random id: ObjectId) {
 		val thrown = assertThrows<ArticleNotFoundException> {
 			controller.getArticleById(id)

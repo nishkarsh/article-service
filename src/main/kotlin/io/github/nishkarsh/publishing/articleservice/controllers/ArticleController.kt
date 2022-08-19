@@ -24,6 +24,11 @@ class ArticleController(private val service: ArticleService) {
 			?: throw ArticleNotFoundException("Could not find article with ID: $id")
 	}
 
+	@GetMapping
+	fun searchArticles(@RequestParam allParams: Map<String, String>): ResponseEntity<List<Article>> {
+		return ResponseEntity.ok(service.getArticles(allParams))
+	}
+
 	@PutMapping("/{id}")
 	fun updateArticle(@PathVariable id: ObjectId, @RequestBody article: Article): ResponseEntity<Unit> {
 		service.updateArticle(article.copy(id = id))

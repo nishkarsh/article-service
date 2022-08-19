@@ -17,6 +17,10 @@ class ArticleService(private val repository: ArticleRepository) {
 		return repository.findByIdOrNull(id)
 	}
 
+	fun getArticles(allParams: Map<String, String>): List<Article> {
+		TODO("Not yet implemented")
+	}
+
 	fun updateArticle(article: Article): Article {
 		when {
 			repository.existsById(article.id!!) -> return repository.save(article)
