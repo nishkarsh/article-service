@@ -26,7 +26,7 @@ class ArticleController(private val service: ArticleService) {
 
 	@DeleteMapping("/{id}")
 	fun deleteById(@PathVariable id: ObjectId): ResponseEntity<Unit> {
-		service.deleteById(id)
+		service.deleteArticleById(id)
 		return ResponseEntity.noContent().build()
 	}
 }

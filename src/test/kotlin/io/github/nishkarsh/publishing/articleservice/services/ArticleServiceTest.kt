@@ -2,6 +2,7 @@ package io.github.nishkarsh.publishing.articleservice.services
 
 import io.github.glytching.junit.extension.random.Random
 import io.github.glytching.junit.extension.random.RandomBeansExtension
+import io.github.nishkarsh.publishing.articleservice.exceptions.ArticleNotFoundException
 import io.github.nishkarsh.publishing.articleservice.models.Article
 import io.github.nishkarsh.publishing.articleservice.repositories.ArticleRepository
 import org.bson.types.ObjectId
@@ -9,6 +10,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is.`is`
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.Extensions
 import org.mockito.InjectMocks
@@ -16,6 +18,8 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.stub
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import java.util.*
 
 @Extensions(ExtendWith(MockitoExtension::class), ExtendWith(RandomBeansExtension::class))
@@ -57,5 +61,25 @@ internal class ArticleServiceTest {
 		val returnedArticle = service.getArticleById(articleId)
 
 		assertNull(returnedArticle)
+	}
+
+	@Test
+	internal fun shouldThrowExceptionOnDeleteWhenArticleNotFound(@Random articleId: ObjectId) {
+		repository.stub { on { existsById(articleId) } doReturn false }
+
+		val exception = assertThrows<ArticleNotFoundException> {
+			service.deleteArticleById(articleId)
+		}
+
+		assertThat(exception.message, `is`("Could not find article with ID: $articleId"))
+	}
+
+	@Test
+	internal fun shouldDeleteArticleByID(@Random articleId: ObjectId) {
+		repository.stub { on { existsById(articleId) } doReturn true }
+
+		service.deleteArticleById(articleId)
+
+		verify(repository, times(1)).deleteById(articleId)
 	}
 }

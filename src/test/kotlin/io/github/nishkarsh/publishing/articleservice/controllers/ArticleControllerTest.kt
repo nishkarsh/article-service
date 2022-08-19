@@ -66,7 +66,7 @@ internal class ArticleControllerTest {
 	internal fun shouldDeleteArticle(@Random id: ObjectId) {
 		val response = controller.deleteById(id)
 
-		verify(service, times(1)).deleteById(id)
+		verify(service, times(1)).deleteArticleById(id)
 		assertThat(response.statusCode, `is`(HttpStatus.NO_CONTENT))
 	}
 }

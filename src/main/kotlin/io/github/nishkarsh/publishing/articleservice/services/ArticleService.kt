@@ -1,5 +1,6 @@
 package io.github.nishkarsh.publishing.articleservice.services
 
+import io.github.nishkarsh.publishing.articleservice.exceptions.ArticleNotFoundException
 import io.github.nishkarsh.publishing.articleservice.models.Article
 import io.github.nishkarsh.publishing.articleservice.repositories.ArticleRepository
 import org.bson.types.ObjectId
@@ -16,7 +17,11 @@ class ArticleService(private val repository: ArticleRepository) {
 		return repository.findByIdOrNull(id)
 	}
 
-	fun deleteById(id: ObjectId) {
-		TODO("Not yet implemented")
+	fun deleteArticleById(id: ObjectId) {
+		if (!repository.existsById(id)) {
+			throw ArticleNotFoundException("Could not find article with ID: $id")
+		}
+
+		repository.deleteById(id)
 	}
 }
