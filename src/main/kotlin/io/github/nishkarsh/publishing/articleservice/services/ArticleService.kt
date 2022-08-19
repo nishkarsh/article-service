@@ -18,17 +18,16 @@ class ArticleService(private val repository: ArticleRepository) {
 	}
 
 	fun updateArticle(article: Article): Article {
-		when (repository.existsById(article.id!!)) {
-			true -> return repository.save(article)
+		when {
+			repository.existsById(article.id!!) -> return repository.save(article)
 			else -> throw ArticleNotFoundException("Could not find article with ID: ${article.id}")
 		}
 	}
 
 	fun deleteArticleById(id: ObjectId) {
-		if (!repository.existsById(id)) {
-			throw ArticleNotFoundException("Could not find article with ID: $id")
+		when {
+			repository.existsById(id) -> repository.deleteById(id)
+			else -> throw ArticleNotFoundException("Could not find article with ID: $id")
 		}
-
-		repository.deleteById(id)
 	}
 }
