@@ -23,4 +23,10 @@ class ArticleController(private val service: ArticleService) {
 		return service.getArticleById(id)?.let { ResponseEntity.ok(it) }
 			?: throw ArticleNotFoundException("Could not find article with ID: $id")
 	}
+
+	@DeleteMapping("/{id}")
+	fun deleteById(@PathVariable id: ObjectId): ResponseEntity<Unit> {
+		service.deleteById(id)
+		return ResponseEntity.noContent().build()
+	}
 }

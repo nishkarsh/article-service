@@ -17,6 +17,8 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.stub
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.springframework.http.HttpStatus
 import java.net.URI
 
@@ -58,5 +60,13 @@ internal class ArticleControllerTest {
 		}
 
 		assertThat(thrown.message, `is`("Could not find article with ID: $id"))
+	}
+
+	@Test
+	internal fun shouldDeleteArticle(@Random id: ObjectId) {
+		val response = controller.deleteById(id)
+
+		verify(service, times(1)).deleteById(id)
+		assertThat(response.statusCode, `is`(HttpStatus.NO_CONTENT))
 	}
 }

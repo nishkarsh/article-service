@@ -15,4 +15,8 @@ class ArticleService(private val repository: ArticleRepository) {
 	fun getArticleById(id: ObjectId): Article? {
 		return repository.findByIdOrNull(id)
 	}
+
+	fun deleteById(id: ObjectId) {
+		TODO("Not yet implemented")
+	}
 }
