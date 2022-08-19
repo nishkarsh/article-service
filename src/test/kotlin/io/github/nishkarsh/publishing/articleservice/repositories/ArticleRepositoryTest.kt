@@ -3,8 +3,12 @@ package io.github.nishkarsh.publishing.articleservice.repositories
 import io.github.glytching.junit.extension.random.Random
 import io.github.glytching.junit.extension.random.RandomBeansExtension
 import io.github.nishkarsh.publishing.articleservice.config.MongoConfig
+import io.github.nishkarsh.publishing.articleservice.helpers.TestHelper.toUtcAndTruncatedToSeconds
+import io.github.nishkarsh.publishing.articleservice.helpers.TestHelper.truncateToSeconds
 import io.github.nishkarsh.publishing.articleservice.models.Article
-import org.assertj.core.api.Assertions.assertThat
+import org.hamcrest.CoreMatchers.hasItem
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -30,18 +34,14 @@ internal class ArticleRepositoryTest {
 
 	@Test
 	internal fun shouldCreateArticle(@Random(excludes = ["id"]) article: Article) {
-		val insertedArticle = repository.insert(article)
+		val insertedArticle = repository.insert(article.copy(publishDate = truncateToSeconds(article.publishDate)))
 
 		val foundArticles = mongoTemplate.findAll(Article::class.java)
 
+		val expectedArticle = insertedArticle.copy(publishDate = toUtcAndTruncatedToSeconds(article.publishDate))
 		assertNotNull(insertedArticle)
 		assertNotNull(insertedArticle.id)
-		assertThat(foundArticles).hasSize(1)
-
-		// The insertedArticle would not have the auto-converted timezone
-		// since the converters would kick-in only during read
-		assertThat(foundArticles[0])
-			.usingRecursiveComparison()
-			.ignoringFields(publishDate).isEqualTo(insertedArticle)
+		assertThat(foundArticles, hasSize(1))
+		assertThat(foundArticles, hasItem(expectedArticle))
 	}
 }
