@@ -23,9 +23,7 @@ import org.springframework.http.HttpHeaders.LOCATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -68,16 +66,44 @@ class ArticleControllerIntegrationTest {
 		val articleToInsert = article.copy(publishDate = toUtcAndTruncatedToSeconds(article.publishDate))
 		val insertedArticle = mongoTemplate.insert<Article>(articleToInsert)
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/articles/{id}", insertedArticle.id))
+		mockMvc.perform(get("/articles/{id}", insertedArticle.id))
 			.andExpect(status().isOk)
 			.andExpect(content().json(objectMapper.writeValueAsString(insertedArticle)))
 	}
 
 	@Test
 	internal fun shouldReturn404WhenArticleNotFound(@Random articleId: ObjectId) {
-		mockMvc.perform(MockMvcRequestBuilders.get("/articles/{id}", articleId))
+		mockMvc.perform(get("/articles/{id}", articleId))
 			.andExpect(status().isNotFound)
 			.andExpect(content().json("{\"message\":\"Could not find article with ID: ${articleId}\"}"))
+	}
+
+	@Test
+	internal fun shouldUpdateArticle(@Random article: Article) {
+		val articleToInsert = article.copy(publishDate = toUtcAndTruncatedToSeconds(article.publishDate))
+		val insertedArticle = mongoTemplate.insert<Article>(articleToInsert)
+		assertNotNull(insertedArticle)
+
+		val articleToUpdate = insertedArticle.copy(header = "This article has been updated")
+		val request = put("/articles/{id}", insertedArticle.id)
+			.content(objectMapper.writeValueAsBytes(articleToUpdate))
+			.contentType(APPLICATION_JSON)
+
+		mockMvc.perform(request).andExpect(status().isNoContent)
+
+		val savedArticle = mongoTemplate.findById<Article>(insertedArticle.id!!)
+		assertThat(savedArticle, `is`(articleToUpdate))
+	}
+
+	@Test
+	internal fun shouldNotAllowCreateUsingPutMethod(@Random article: Article) {
+		val request = put("/articles/{id}", article.id)
+			.content(objectMapper.writeValueAsBytes(article))
+			.contentType(APPLICATION_JSON)
+
+		mockMvc.perform(request)
+			.andExpect(status().isNotFound)
+			.andExpect(content().json("{\"message\":\"Could not find article with ID: ${article.id}\"}"))
 	}
 
 	@Test
