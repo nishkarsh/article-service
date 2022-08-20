@@ -24,6 +24,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Query
 import java.util.*
 
 @Extensions(ExtendWith(MockitoExtension::class), ExtendWith(RandomBeansExtension::class))
@@ -77,12 +78,12 @@ internal class ArticleServiceTest {
 		val pageable = Pageable.ofSize(3)
 		val query = with(criteria) {
 			SearchQueryBuilder().authorNameLike(author).fromPublishDate(fromPublishDate)
-				.toPublishDate(toPublishDate).keywordLike(keyword).build().with(pageable)
+				.toPublishDate(toPublishDate).keywordLike(keyword).build()
 		}
 
 		mongoTemplate.stub {
-			on { find(query, Article::class.java) } doReturn articles
-			on { count(query, Article::class.java) } doReturn 10
+			on { find(query.with(pageable), Article::class.java) } doReturn articles
+			on { count(Query.of(query).limit(-1).skip(-1), Article::class.java) } doReturn 10
 		}
 
 		val pagedArticles = service.getArticles(criteria, pageable)

@@ -5,13 +5,12 @@ import io.github.nishkarsh.publishing.articleservice.models.Article
 import io.github.nishkarsh.publishing.articleservice.models.SearchCriteria
 import io.github.nishkarsh.publishing.articleservice.models.SearchQueryBuilder
 import io.github.nishkarsh.publishing.articleservice.repositories.ArticleRepository
+import io.github.nishkarsh.publishing.articleservice.repositories.find
 import org.bson.types.ObjectId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.find
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.data.support.PageableExecutionUtils.getPage
 import org.springframework.stereotype.Service
 
 @Service
@@ -33,12 +32,10 @@ class ArticleService(
 				.fromPublishDate(fromPublishDate)
 				.toPublishDate(toPublishDate)
 				.keywordLike(keyword)
-				.build().with(pageable)
+				.build()
 		}
 
-		mongoTemplate.find<Article>(query).let { results ->
-			return getPage(results, pageable) { mongoTemplate.count(query, Article::class.java) }
-		}
+		return mongoTemplate.find(query, pageable)
 	}
 
 	fun updateArticle(article: Article): Article {
