@@ -31,8 +31,9 @@ internal class SearchQueryBuilder(private val criteria: MutableSet<Criteria> = m
 	}
 
 	fun build(): Query {
-		return Query().apply {
-			addCriteria(Criteria().andOperator(criteria))
+		return when (criteria.size) {
+			0 -> Query(Criteria())
+			else -> Query(Criteria().andOperator(criteria))
 		}
 	}
 }

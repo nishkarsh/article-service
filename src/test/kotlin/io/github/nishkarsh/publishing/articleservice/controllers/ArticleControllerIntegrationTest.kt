@@ -3,16 +3,17 @@ package io.github.nishkarsh.publishing.articleservice.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.glytching.junit.extension.random.Random
 import io.github.glytching.junit.extension.random.RandomBeansExtension
+import io.github.nishkarsh.publishing.articleservice.helpers.TestHelper.getSampleArticlesWithPublishDates
 import io.github.nishkarsh.publishing.articleservice.helpers.TestHelper.toUtcAndTruncatedToSeconds
 import io.github.nishkarsh.publishing.articleservice.models.Article
 import org.bson.types.ObjectId
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.`is`
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -24,8 +25,8 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import java.time.ZonedDateTime
 
 
 @SpringBootTest
@@ -123,5 +124,93 @@ class ArticleControllerIntegrationTest {
 		mockMvc.perform(delete("/articles/{id}", articleId))
 			.andExpect(status().isNotFound)
 			.andExpect(content().json("{\"message\":\"Could not find article with ID: ${articleId}\"}"))
+	}
+
+	@Nested
+	@TestInstance(Lifecycle.PER_CLASS)
+	inner class ArticlesSearchIntegrationTest {
+		private lateinit var savedArticles: Collection<Article>
+
+		@BeforeEach
+		internal fun setUp() {
+			val juneOne2022 = ZonedDateTime.parse("2022-06-01T10:10:20.200Z")
+			val julyTwo2022 = ZonedDateTime.parse("2022-07-02T10:10:20.200Z")
+
+			val articles = getSampleArticlesWithPublishDates(juneOne2022, julyTwo2022)
+			savedArticles = mongoTemplate.insertAll(articles)
+		}
+
+		@Test
+		internal fun shouldSearchArticlesByAuthorName() {
+			val request = get("/articles").param("author", "nish")
+
+			mockMvc.perform(request)
+				.andExpect(status().isOk)
+				.andExpect(jsonPath("$.content[0].header", `is`("Article One")))
+				.andExpect(jsonPath("$.content[1].header", `is`("Article Two")))
+				.andExpect(jsonPath("$.totalPages", `is`(1)))
+				.andExpect(jsonPath("$.totalElements", `is`(2)))
+		}
+
+		@Test
+		internal fun shouldSearchArticlesByKeyword() {
+			val request = get("/articles").param("keyword", "july")
+
+			mockMvc.perform(request)
+				.andExpect(status().isOk)
+				.andExpect(jsonPath("$.content[0].header", `is`("Article Two")))
+				.andExpect(jsonPath("$.content[1].header", `is`("Article Three")))
+				.andExpect(jsonPath("$.totalPages", `is`(1)))
+				.andExpect(jsonPath("$.totalElements", `is`(2)))
+		}
+
+		@Test
+		internal fun shouldSearchArticlesByPublishDate() {
+			val juneOne2022 = ZonedDateTime.parse("2022-06-01T10:10:20.200Z")
+			val julyOne2022 = ZonedDateTime.parse("2022-07-01T10:10:20.200Z")
+
+			val request = get("/articles")
+				.param("fromPublishDate", juneOne2022.toString())
+				.param("toPublishDate", julyOne2022.toString())
+
+			mockMvc.perform(request)
+				.andExpect(status().isOk)
+				.andExpect(jsonPath("$.content[0].header", `is`("Article One")))
+				.andExpect(jsonPath("$.totalPages", `is`(1)))
+				.andExpect(jsonPath("$.totalElements", `is`(1)))
+		}
+
+		@Test
+		internal fun shouldSearchArticlesWithMultipleCriteria() {
+			val request = get("/articles")
+				.param("author", "Nishkarsh")
+				.param("keyword", "july")
+
+			mockMvc.perform(request)
+				.andExpect(status().isOk)
+				.andExpect(jsonPath("$.content[0].header", `is`("Article Two")))
+				.andExpect(jsonPath("$.totalPages", `is`(1)))
+				.andExpect(jsonPath("$.totalElements", `is`(1)))
+		}
+
+		@Test
+		internal fun shouldGetAllArticlesPagedWhenNoQuerySpecified(
+			@Random(size = 20, type = Article::class) moreArticles: List<Article>
+		) {
+			mongoTemplate.insertAll(moreArticles).also {
+				assertThat(it, hasSize(20))
+			}
+
+			mockMvc.perform(get("/articles"))
+				.andExpect(status().isOk)
+				.andExpect(jsonPath("$.totalPages", `is`(2)))
+				.andExpect(jsonPath("$.numberOfElements", `is`(20)))
+				.andExpect(jsonPath("$.totalElements", `is`(23)))
+		}
+
+		@AfterEach
+		internal fun tearDown() {
+			mongoTemplate.dropCollection(Article::class.java)
+		}
 	}
 }
