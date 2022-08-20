@@ -28,4 +28,10 @@ data class Article(
 
 	@JsonProperty("keywords")
 	val keywords: ArrayList<String>,
-)
+) {
+	companion object {
+		const val AUTHORS = "authors"
+		const val PUBLISH_DATE = "publishDate"
+		const val KEYWORDS = "keywords"
+	}
+}

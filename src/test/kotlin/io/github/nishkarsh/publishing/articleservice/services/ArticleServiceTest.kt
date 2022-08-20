@@ -4,6 +4,8 @@ import io.github.glytching.junit.extension.random.Random
 import io.github.glytching.junit.extension.random.RandomBeansExtension
 import io.github.nishkarsh.publishing.articleservice.exceptions.ArticleNotFoundException
 import io.github.nishkarsh.publishing.articleservice.models.Article
+import io.github.nishkarsh.publishing.articleservice.models.SearchCriteria
+import io.github.nishkarsh.publishing.articleservice.models.SearchQueryBuilder
 import io.github.nishkarsh.publishing.articleservice.repositories.ArticleRepository
 import org.bson.types.ObjectId
 import org.hamcrest.MatcherAssert.assertThat
@@ -20,12 +22,17 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.springframework.data.domain.Pageable
+import org.springframework.data.mongodb.core.MongoTemplate
 import java.util.*
 
 @Extensions(ExtendWith(MockitoExtension::class), ExtendWith(RandomBeansExtension::class))
 internal class ArticleServiceTest {
 	@Mock
 	private lateinit var repository: ArticleRepository
+
+	@Mock
+	private lateinit var mongoTemplate: MongoTemplate
 
 	@InjectMocks
 	private lateinit var service: ArticleService
@@ -61,6 +68,29 @@ internal class ArticleServiceTest {
 		val returnedArticle = service.getArticleById(articleId)
 
 		assertNull(returnedArticle)
+	}
+
+	@Test
+	internal fun shouldGetPagedArticlesBasedOnSearchCriteria(
+		@Random criteria: SearchCriteria, @Random(size = 3) articles: List<Article>
+	) {
+		val pageable = Pageable.ofSize(3)
+		val query = with(criteria) {
+			SearchQueryBuilder().authorNameLike(author).fromPublishDate(fromPublishDate)
+				.toPublishDate(toPublishDate).keywordLike(keyword).build().with(pageable)
+		}
+
+		mongoTemplate.stub {
+			on { find(query, Article::class.java) } doReturn articles
+			on { count(query, Article::class.java) } doReturn 10
+		}
+
+		val pagedArticles = service.getArticles(criteria, pageable)
+
+		assertThat(pagedArticles.numberOfElements, `is`(3))
+		assertThat(pagedArticles.totalPages, `is`(4))
+		assertThat(pagedArticles.totalElements, `is`(10))
+		assertThat(pagedArticles.content, `is`(articles))
 	}
 
 	@Test

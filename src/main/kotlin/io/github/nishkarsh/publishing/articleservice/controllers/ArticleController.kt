@@ -21,15 +21,15 @@ class ArticleController(private val service: ArticleService) {
 		return ResponseEntity.created(URI.create("/articles/${createdArticle.id}")).build()
 	}
 
+	@GetMapping
+	fun searchArticles(criteria: SearchCriteria, pageable: Pageable): ResponseEntity<Page<Article>> {
+		return ResponseEntity.ok(service.getArticles(criteria, pageable))
+	}
+
 	@GetMapping("/{id}")
 	fun getArticleById(@PathVariable id: ObjectId): ResponseEntity<Article> {
 		return service.getArticleById(id)?.let { ResponseEntity.ok(it) }
 			?: throw ArticleNotFoundException("Could not find article with ID: $id")
-	}
-
-	@GetMapping
-	fun searchArticles(@RequestParam criteria: SearchCriteria, pageable: Pageable): ResponseEntity<Page<Article>> {
-		return ResponseEntity.ok(service.getArticles(criteria, pageable))
 	}
 
 	@PutMapping("/{id}")

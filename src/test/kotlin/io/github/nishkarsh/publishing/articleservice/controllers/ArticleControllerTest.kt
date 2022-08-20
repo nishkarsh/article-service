@@ -22,6 +22,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import java.net.URI
@@ -59,11 +60,12 @@ internal class ArticleControllerTest {
 
 	@Test
 	internal fun shouldGetPagedArticlesByQueryParams(
-		@Random(size = 10) articles: List<Article>, @Random searchCriteria: SearchCriteria, @Random pageable: Pageable
+		@Random(size = 10) articles: List<Article>, @Random criteria: SearchCriteria
 	) {
-		service.stub { on { getArticles(searchCriteria, pageable) } doReturn PageImpl(articles) }
+		val pageable = PageRequest.of(2, 3)
+		service.stub { on { getArticles(criteria, pageable) } doReturn PageImpl(articles) }
 
-		val response = controller.searchArticles(searchCriteria, pageable)
+		val response = controller.searchArticles(criteria, pageable)
 
 		assertThat(response.statusCode, `is`(HttpStatus.OK))
 		assertThat(response.body, `is`(PageImpl(articles)))
