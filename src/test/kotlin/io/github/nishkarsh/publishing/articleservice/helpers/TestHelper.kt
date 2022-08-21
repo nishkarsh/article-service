@@ -1,12 +1,21 @@
 package io.github.nishkarsh.publishing.articleservice.helpers
 
 import io.github.nishkarsh.publishing.articleservice.models.Article
+import org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric
 import org.bson.types.ObjectId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 object TestHelper {
+	fun Article.withValidTextFields() = run {
+		copy(
+			header = randomAlphanumeric(70),
+			shortDescription = randomAlphanumeric(100),
+			text = randomAlphanumeric(300)
+		)
+	}
+
 	fun toUtcAndTruncatedToSeconds(date: ZonedDateTime): ZonedDateTime {
 		return date.withZoneSameInstant(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS)
 	}

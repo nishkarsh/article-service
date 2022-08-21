@@ -10,13 +10,14 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/articles")
 class ArticleController(private val service: ArticleService) {
 
 	@PostMapping
-	fun createArticle(@RequestBody article: Article): ResponseEntity<Unit> {
+	fun createArticle(@Valid @RequestBody article: Article): ResponseEntity<Unit> {
 		val createdArticle = service.createArticle(article)
 		return ResponseEntity.created(URI.create("/articles/${createdArticle.id}")).build()
 	}
@@ -33,7 +34,7 @@ class ArticleController(private val service: ArticleService) {
 	}
 
 	@PutMapping("/{id}")
-	fun updateArticle(@PathVariable id: ObjectId, @RequestBody article: Article): ResponseEntity<Unit> {
+	fun updateArticle(@PathVariable id: ObjectId, @RequestBody @Valid article: Article): ResponseEntity<Unit> {
 		service.updateArticle(article.copy(id = id))
 		return ResponseEntity.noContent().build()
 	}
