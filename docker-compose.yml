@@ -15,7 +15,5 @@ services:
       DB_HOST: mongodb
       DB_USER: service-read-write
       DB_PASS: rq#53$M9Hk
-    volumes:
-      - .:/development
     depends_on:
       - mongodb
