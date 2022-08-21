@@ -1,0 +1,41 @@
+### These requests could be used after executing the create requests first
+### The location of the last created article (/articles/{id}) is automatically saved after executing create request
+
+# @name GET the last created Article
+GET http://{{host}}:{{port}}/{{lastCreatedArticleLocation}}
+
+###
+
+# @name GET all the articles created by an author
+GET http://{{host}}:{{port}}/articles?author=Nishkarsh
+
+###
+
+# @name GET all the articles created by an author by mentioning partial name
+GET http://{{host}}:{{port}}/articles?author=ar
+
+###
+
+# @name GET all the articles created by keyword
+GET http://{{host}}:{{port}}/articles?keyword=berlin
+
+###
+
+# @name GET all the articles to be published (or already published) between a period
+GET http://{{host}}:{{port}}/articles?
+    fromPublishDate=2022-08-18T00:00:00.000Z&
+    toPublishDate=2022-08-22T00:00:00.000Z
+
+###
+
+# @name GET all articles filtered by multiple criteria
+GET http://{{host}}:{{port}}/articles?
+    fromPublishDate=2022-08-18T00:00:00.000Z&
+    toPublishDate=2022-08-22T00:00:00.000Z&
+    author=Nishkarsh&
+    keyword=Berlin
+
+###
+
+# @name GET a specific page of articles
+GET http://{{host}}:{{port}}/articles?author=Nishkarsh&page=2&size=2

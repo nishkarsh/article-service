@@ -1,0 +1,19 @@
+# @name Updates last created Article
+PUT http://{{host}}:{{port}}/{{lastCreatedArticleLocation}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "header": "Updated: {{lastCreatedArticleHeader}}",
+  "shortDescription": "A hallucination or reality? That's what everyone is thinking about!",
+  "text": "More than 5 people seem to have seen a Tiger in Berlin roaming around the streets. It has been told that the Tiger was searching for something very specific and didn't seem interested in killing or eating anyone.",
+  "publishDate": "2022-08-20T20:58:27+05:30",
+  "authors": [
+    "Nishkarsh Sharma",
+    "Paras Khulbe"
+  ],
+  "keywords": [
+    "tiger",
+    "berlin",
+    "danger"
+  ]
+}

@@ -1,0 +1,3 @@
+# @name Delete last created article
+
+DELETE http://{{host}}:{{port}}/{{lastCreatedArticleLocation}}

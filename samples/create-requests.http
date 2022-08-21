@@ -1,0 +1,84 @@
+### These requests would help setup a few Articles in the DB.
+### Remember, currently the logic to identify duplicates does not exist, duplicates can't be avoided.
+
+# @name Create an Article (1)
+POST http://{{host}}:{{port}}/articles HTTP/1.1
+Content-Type: application/json
+
+{
+  "header": "A Tiger seen in Berlin",
+  "shortDescription": "A hallucination or reality? That's what everyone is thinking about!",
+  "text": "More than 5 people seem to have seen a Tiger in Berlin roaming around the streets. It has been told that the Tiger was searching for something very specific and didn't seem interested in killing or eating anyone.",
+  "publishDate": "2022-08-20T20:58:27+05:30",
+  "authors": [
+    "Nishkarsh Sharma",
+    "Paras Khulbe"
+  ],
+  "keywords": [
+    "tiger",
+    "berlin",
+    "danger"
+  ]
+}
+
+> {%
+        client.global.set("lastCreatedArticleLocation", response.headers.valueOf("Location"));
+        client.global.set("lastCreatedArticleHeader", "A Tiger seen in Berlin");
+        client.log(`Created article at location: ${response.headers.valueOf("Location")}`);
+   %}
+
+###
+
+# @name Create another Article (2)
+POST http://{{host}}:{{port}}/articles HTTP/1.1
+Content-Type: application/json
+
+{
+  "header": "Biggest cycle marathon in History of Berlin",
+  "shortDescription": "The marathon will take place on 20th December, 2022 and over 1000 people will participate.",
+  "text": "The people of Berlin will get to witness on 20th December, 2022, what is believed to be the biggest cycling marathon in the history of Berlin. It's expected that over 1000 Berliners will participate in the event and cycle over 150 kms.",
+  "publishDate": "2022-08-17T20:58:27Z",
+  "authors": [
+    "Nishkarsh",
+    "Victor"
+  ],
+  "keywords": [
+    "berlin",
+    "cycling marathon",
+    "biggest cycling event"
+  ]
+}
+
+> {%
+        client.global.set("lastCreatedArticleLocation", response.headers.valueOf("Location"));
+        client.global.set("lastCreatedArticleHeader", "Biggest cycle marathon in History of Berlin");
+        client.log(`Created article at location: ${response.headers.valueOf("Location")}`);
+   %}
+
+###
+
+# @name Create yet another Article (3)
+POST http://{{host}}:{{port}}/articles HTTP/1.1
+Content-Type: application/json
+
+{
+  "header": "Coldplay to perform in Berlin in July 2022",
+  "shortDescription": "The World of Spheres Tour has brought Coldplay to Berlin",
+  "text": "The Olympiastadion is going to be full of folks who love songs like \"Something just like this\" or \"A Sky full of Stars\"",
+  "publishDate": "2022-08-17T20:58:27Z",
+  "authors": [
+    "Nishkarsh",
+    "Victor"
+  ],
+  "keywords": [
+    "berlin",
+    "cycling marathon",
+    "biggest cycling event"
+  ]
+}
+
+> {%
+        client.global.set("lastCreatedArticleLocation", response.headers.valueOf("Location"));
+        client.global.set("lastCreatedArticleHeader", "Coldplay to perform in Berlin in July 2022");
+        client.log(`Created article at location: ${response.headers.valueOf("Location")}`);
+   %}
