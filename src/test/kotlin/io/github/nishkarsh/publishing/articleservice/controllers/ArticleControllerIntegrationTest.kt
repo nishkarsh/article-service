@@ -8,8 +8,7 @@ import io.github.nishkarsh.publishing.articleservice.helpers.TestHelper.toUtcAnd
 import io.github.nishkarsh.publishing.articleservice.models.Article
 import org.bson.types.ObjectId
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.hasSize
-import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -49,7 +48,7 @@ class ArticleControllerIntegrationTest {
 	}
 
 	@Test
-	internal fun shouldCreateArticle(@Random(excludes = ["id"]) article: Article) {
+	internal fun shouldCreateArticle(@Random article: Article) {
 		val request = post("/articles/")
 			.content(objectMapper.writeValueAsBytes(article))
 			.contentType(APPLICATION_JSON)
@@ -60,6 +59,7 @@ class ArticleControllerIntegrationTest {
 		val foundArticles = mongoTemplate.findAll(Article::class.java)
 		assertThat(foundArticles, hasSize(1))
 		assertThat(result.response.getHeaderValue(LOCATION), `is`("/articles/${foundArticles[0].id}"))
+		assertThat("ID passed in the body must be ignored", foundArticles[0].id, `is`(not(article.id)))
 	}
 
 	@Test
