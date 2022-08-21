@@ -2,6 +2,7 @@ package io.github.nishkarsh.publishing.articleservice.repositories
 
 import io.github.glytching.junit.extension.random.Random
 import io.github.glytching.junit.extension.random.RandomBeansExtension
+import io.github.nishkarsh.publishing.articleservice.ArticleServiceApplication
 import io.github.nishkarsh.publishing.articleservice.config.MongoConfig
 import io.github.nishkarsh.publishing.articleservice.models.Article
 import org.hamcrest.MatcherAssert.assertThat
@@ -20,10 +21,12 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 
 @DataMongoTest
 @ActiveProfiles("test")
 @Import(MongoConfig::class)
+@ContextConfiguration(classes = [ArticleServiceApplication::class])
 @Extensions(ExtendWith(RandomBeansExtension::class))
 internal class MongoTemplateExtKtTest {
 	@Autowired

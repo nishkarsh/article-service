@@ -24,6 +24,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
+	implementation("io.github.microutils:kotlin-logging-jvm:2.1.23")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.8")
