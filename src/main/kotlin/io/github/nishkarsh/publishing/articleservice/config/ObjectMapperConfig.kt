@@ -1,5 +1,6 @@
 package io.github.nishkarsh.publishing.articleservice.config
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
@@ -14,6 +15,7 @@ internal class ObjectMapperConfig {
 	fun customizer(): Jackson2ObjectMapperBuilderCustomizer? {
 		return Jackson2ObjectMapperBuilderCustomizer { builder: Jackson2ObjectMapperBuilder ->
 			builder.serializerByType(ObjectId::class.java, ToStringSerializer())
+			builder.serializationInclusion(JsonInclude.Include.NON_NULL)
 		}
 	}
 }
